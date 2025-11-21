@@ -1,3 +1,7 @@
+alias projetos="cd /mnt/backup/AI-Project/Projetos/"
+
+
+
 # ===== Base =====
 export EDITOR=vim
 HISTFILE=~/.zsh_history
@@ -35,6 +39,40 @@ if [ -f ~/.aliases ]; then
 fi
 
 # ~/.aliases
+encontre() {
+    if [ -z "$1" ]; then
+        echo "Uso: encontre \"texto a procurar\""
+        return 1
+    fi
+
+    local resultados
+    resultados=$(grep -RIn \
+        --color=never \
+        --exclude-dir='.git' \
+        --exclude-dir='build' \
+        --exclude-dir='dist' \
+        --exclude-dir='.cache' \
+        --exclude-dir='node_modules' \
+        --exclude-dir='.venv' \
+        --exclude-dir='.wine' \
+        --exclude-dir='SteamLibrary' \
+        --exclude='*.log' \
+        --exclude='*.mp4' \
+        --exclude='*.png' \
+        --exclude='*.jpg' \
+        --exclude='*.jpeg' \
+        "$1" . 2>/dev/null | grep -v '\.wine' | uniq)
+
+    if [ -z "$resultados" ]; then
+        echo "Nenhum resultado."
+        return 0
+    fi
+
+    echo "$resultados" | while IFS=: read -r file line content; do
+        printf "\033[1;36m→ %s\033[0m \033[1;33m(linha %s)\033[0m\n" "$file" "$line"
+        printf "     %s\n\n" "$content"
+    done
+}
 
 # Atualizar sistema
 alias upd="sudo pacman -Syu"
@@ -127,9 +165,6 @@ remover() {
   fi
 }
 
-
-# ═════════════════════🌀 GIT INTELIGENTE (manda) ═════════════════════
-# ═════════════════════🌀 GIT INTELIGENTE (manda) — versão função segura ═════════════════════
 manda() {
   # 1) Valida repositório
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -137,12 +172,22 @@ manda() {
     return 1
   fi
 
-  # 2) Mensagem de commit (usa argumentos ou padrão)
+  # 2) Mensagem de commit (inteligente)
   local msg
+
   if [[ -n "$*" ]]; then
     msg="$*"
   else
-    msg="🟢 update made - minor bugs fixed"
+    # Gera mensagem automática com base nos arquivos alterados
+    local changes
+    changes=$(git diff --cached --name-only)
+    [[ -z "$changes" ]] && changes=$(git diff --name-only)
+
+    if [[ -n "$changes" ]]; then
+      msg="update: $(echo "$changes" | tr '\n' ' ')"
+    else
+      msg="update"
+    fi
   fi
 
   printf "\033[1;34m[🧠]\033[0m Adicionando tudo (git add -A)...\n"
@@ -172,8 +217,25 @@ manda() {
     git push -u origin "$branch" || return $?
   fi
 
-  printf "\033[1;32m[✅]\033[0m Push enviado com sucesso!\n"
+  printf "\033[1;32m[✅]\033[0m Push enviado para branch %s!\n" "$branch"
 }
+
+
+
+compilar() {
+    local LOG="/mnt/backup/AI-Project/Projetos/Erros-Logs/log.txt"
+
+    echo "🧹 Limpando build..."
+    make clean > "$LOG" 2>&1
+
+    echo "🔨 Compilando..."
+    make >> "$LOG" 2>&1
+
+    echo "📄 Log salvo em: $LOG"
+    echo "--------------------------------------"
+    tail -n 40 "$LOG"
+}
+
 
 # ═════════════════════🌐 GIT CLONE AUTOMÁTICO ═════════════════════
 
@@ -191,3 +253,22 @@ function clone_github_if_url() {
   zle .accept-line
 }
 zle -N accept-line clone_github_if_url
+
+
+# Adicione isso ao seu ~/.zshrc
+source ~/.zplug/init.zsh
+
+# Plugins
+zplug "zsh-users/zsh-autosuggestions"
+zplug "zsh-users/zsh-syntax-highlighting"
+zplug "zsh-users/zsh-history-substring-search"
+
+# Instalar caso não estejam instalados
+if ! zplug check --verbose; then
+    zplug install
+fi
+
+# Carregar os plugins
+zplug load
+
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
