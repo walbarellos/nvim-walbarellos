@@ -131,24 +131,16 @@ return {
                         callback = vim.lsp.buf.clear_references,
                     })
                 end
-            end
+            local lspconfig = require("lspconfig")
 
-            -- ---------------------------------------------------------------
-            -- APARÊNCIA DOS DIAGNÓSTICOS
-            -- ---------------------------------------------------------------
+            -- Configuração global de diagnósticos
             vim.diagnostic.config({
-                virtual_text = {
-                    prefix  = "●",
-                    spacing = 4,
-                },
-                signs       = true,
-                underline   = true,
-                update_in_insert = false,  -- não mostra erros enquanto digita
-                severity_sort    = true,
-                float = {
-                    border = "rounded",
-                    source = "always",
-                },
+                virtual_text = { prefix = "●", spacing = 4 },
+                signs = true,
+                underline = true,
+                update_in_insert = false,
+                severity_sort = true,
+                float = { border = "rounded", source = "always" },
             })
 
             -- Ícones na coluna de sinais
