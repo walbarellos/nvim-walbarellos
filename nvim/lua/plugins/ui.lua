@@ -343,8 +343,7 @@ return {
     -- =========================================================================
     -- Quando você digita #ff5500 ou rgb(255, 0, 0), ele colore o fundo.
     {
-        "NvimDev/nvim-colorizer.lua",
-        -- Repositório alternativo (nvchad/nvim-colorizer.lua também funciona)
+        "NvChad/nvim-colorizer.lua",
         event = "BufReadPost",
         opts  = {
             filetypes = { "*" },
