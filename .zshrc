@@ -272,3 +272,9 @@ fi
 zplug load
 
 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+export PATH="$HOME/.npm-global/bin:$PATH"
+
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
