@@ -26,11 +26,15 @@ bindkey -e        # estilo Emacs; use 'bindkey -v' pra estilo Vim
 # Autosuggestions
 if [ -r /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
   source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+elif [ -r "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+  source "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
 fi
 
 # Syntax highlighting (SEMPRE por último)
 if [ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
   source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+elif [ -r "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+  source "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 
 # Carregar aliases
@@ -235,6 +239,187 @@ compilar() {
     echo "--------------------------------------"
     tail -n 40 "$LOG"
 }
+
+# ═════════════════════🎓 HELPERS DA FACULDADE (C, PYTHON, WEB) ═════════════════════
+
+cbuild() {
+  local src="${1:-main.c}"
+  local out="${2:-${src%.*}}"
+
+  if [[ ! -f "$src" ]]; then
+    echo "Arquivo não encontrado: $src"
+    echo "Uso: cbuild [arquivo.c] [saida]"
+    echo "Ex.: cbuild main.c main"
+    return 1
+  fi
+
+  gcc "$src" -Wall -Wextra -std=c11 -g -o "$out"
+}
+
+crun() {
+  local src="${1:-main.c}"
+  local out="${2:-${src%.*}}"
+
+  cbuild "$src" "$out" || return 1
+  [[ "$out" == */* ]] && "$out" || "./$out"
+}
+
+cnew() {
+  local file="${1:-main.c}"
+
+  [[ "$file" != *.c ]] && file="${file}.c"
+
+  if [[ -e "$file" ]]; then
+    echo "Arquivo já existe: $file"
+    return 1
+  fi
+
+  cat > "$file" <<'EOF'
+#include <stdio.h>
+
+int main(void) {
+    printf("Ola, mundo!\n");
+    return 0;
+}
+EOF
+
+  echo "Criado: $file"
+}
+
+cdebug() {
+  local exe="${1:-main}"
+
+  if [[ ! -x "$exe" && ! -x "./$exe" ]]; then
+    echo "Executável não encontrado: $exe"
+    echo "Compile antes com: cmain"
+    return 1
+  fi
+
+  [[ "$exe" == */* ]] && gdb "$exe" || gdb "./$exe"
+}
+
+cleak() {
+  local exe="${1:-main}"
+
+  if [[ ! -x "$exe" && ! -x "./$exe" ]]; then
+    echo "Executável não encontrado: $exe"
+    echo "Compile antes com: cmain"
+    return 1
+  fi
+
+  [[ "$exe" == */* ]] && valgrind --leak-check=full "$exe" || valgrind --leak-check=full "./$exe"
+}
+
+pyvenv() {
+  python -m venv .venv || return 1
+  source .venv/bin/activate
+  python -m pip install --upgrade pip
+}
+
+pynew() {
+  local file="${1:-main.py}"
+
+  [[ "$file" != *.py ]] && file="${file}.py"
+
+  if [[ -e "$file" ]]; then
+    echo "Arquivo já existe: $file"
+    return 1
+  fi
+
+  cat > "$file" <<'EOF'
+def main():
+    print("Ola, mundo!")
+
+
+if __name__ == "__main__":
+    main()
+EOF
+
+  echo "Criado: $file"
+}
+
+serve() {
+  local port="${1:-8000}"
+  python -m http.server "$port"
+}
+
+webnew() {
+  local dir="${1:-site}"
+
+  if [[ -e "$dir" ]]; then
+    echo "Pasta ou arquivo já existe: $dir"
+    return 1
+  fi
+
+  mkdir -p "$dir"
+
+  cat > "$dir/index.html" <<'EOF'
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Site</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Meu Site</h1>
+    <p>Comece editando este arquivo.</p>
+    <button id="botao">Clique</button>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
+EOF
+
+  cat > "$dir/style.css" <<'EOF'
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-family: Arial, sans-serif;
+  background: #f4f4f5;
+  color: #18181b;
+}
+
+main {
+  width: min(90vw, 640px);
+}
+
+button {
+  padding: 0.75rem 1rem;
+  border: 0;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+EOF
+
+  cat > "$dir/script.js" <<'EOF'
+const botao = document.querySelector("#botao");
+
+botao.addEventListener("click", () => {
+  alert("Funcionou!");
+});
+EOF
+
+  echo "Criado: $dir"
+  echo "Entre com: cd $dir"
+  echo "Rode com: server"
+}
+
+alias cmain='cbuild main.c main'
+alias run='crun main.c main'
+alias cgdb='cdebug main'
+alias cleaks='cleak main'
+alias venv='pyvenv'
+alias server='serve 8000'
 
 
 # ═════════════════════🌐 GIT CLONE AUTOMÁTICO ═════════════════════

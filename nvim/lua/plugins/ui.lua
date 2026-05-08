@@ -224,7 +224,14 @@ return {
     { "NvChad/nvim-colorizer.lua", event = "BufReadPost", opts = { user_default_options = { tailwind = true } } },
     { "folke/todo-comments.nvim", dependencies = { "nvim-lua/plenary.nvim" }, event = "BufReadPost", opts = {} },
     { "stevearc/dressing.nvim", event = "VeryLazy", opts = {} },
-    { "RRethy/vim-illuminate", event = "BufReadPost", opts = { delay = 200 } },
+    {
+        "RRethy/vim-illuminate",
+        event = "BufReadPost",
+        opts = { delay = 200 },
+        config = function(_, opts)
+            require("illuminate").configure(opts)
+        end,
+    },
     { "folke/persistence.nvim", event = "BufReadPre", opts = {} },
     { "karb94/neoscroll.nvim", event = "BufReadPost", opts = { easing_function = "quadratic" } },
 }
