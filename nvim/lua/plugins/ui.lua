@@ -1,40 +1,42 @@
 -- =============================================================================
 -- UI (lua/plugins/ui.lua)
--- Tema, statusline, bufferline, explorador, tela inicial, atalhos visuais
 -- =============================================================================
+
 return {
 
-    -- Ícones (requer Nerd Font: https://www.nerdfonts.com/)
+    -- Ícones
     { "nvim-tree/nvim-web-devicons", lazy = true },
 
     -- =========================================================================
-    -- TEMA: CATPPUCCIN MOCHA
+    -- TEMA: CATPPUCCIN
     -- =========================================================================
     {
         "catppuccin/nvim",
-        name     = "catppuccin",
+        name = "catppuccin",
         priority = 1000,
+        lazy = false, -- Tema deve carregar IMEDIATAMENTE
         opts = {
-            flavour    = "mocha",
+            flavour = "mocha",
             integrations = {
-                cmp              = true,
-                gitsigns         = true,
-                nvimtree         = true,
-                treesitter       = true,
-                telescope        = { enabled = true },
-                which_key        = true,
-                bufferline       = true,
-                mason            = true,
-                noice            = true,
-                notify           = true,
-                lsp_trouble      = true,
+                cmp = true,
+                gitsigns = true,
+                nvimtree = true,
+                treesitter = true,
+                telescope = { enabled = true },
+                which_key = true,
+                bufferline = true,
+                mason = true,
+                noice = true,
+                notify = true,
+                lsp_trouble = true,
                 indent_blankline = { enabled = true },
                 native_lsp = {
                     enabled = true,
                     underlines = {
-                        errors   = { "underline" },
+                        errors = { "underline" },
+                        hints = { "underline" },
                         warnings = { "underline" },
-                        hints    = { "underline" },
+                        information = { "underline" },
                     },
                 },
             },
@@ -45,14 +47,17 @@ return {
         end,
     },
 
-    -- Statusline Lualine
+    -- =========================================================================
+    -- STATUSLINE: LUALINE
+    -- =========================================================================
     {
         "nvim-lualine/lualine.nvim",
         event = "VeryLazy",
-        dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin/nvim" },
+        dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin" },
         opts = {
             options = {
-                theme = "catppuccin",
+                -- "auto" detecta o colorscheme atual (catppuccin)
+                theme = "auto",
                 globalstatus = true,
                 disabled_filetypes = { statusline = { "dashboard", "alpha" } },
                 component_separators = { left = "|", right = "|" },
@@ -70,28 +75,28 @@ return {
     },
 
     -- =========================================================================
-    -- BUFFERLINE (abas de arquivo no topo)
+    -- BUFFERLINE
     -- =========================================================================
     {
         "akinsho/bufferline.nvim",
-        event        = "BufAdd",
-        version      = "*",
+        event = "BufAdd",
+        version = "*",
         dependencies = { "nvim-tree/nvim-web-devicons" },
         opts = {
             options = {
-                mode            = "buffers",
+                mode = "buffers",
                 separator_style = "slant",
-                diagnostics     = "nvim_lsp",
+                diagnostics = "nvim_lsp",
                 offsets = {
                     {
-                        filetype  = "NvimTree",
-                        text      = "  Explorador",
+                        filetype = "NvimTree",
+                        text = "Explorador",
                         highlight = "Directory",
                         separator = true,
                     },
                 },
-                show_tab_indicators         = true,
-                always_show_bufferline      = false,
+                show_tab_indicators = true,
+                always_show_bufferline = false,
             },
         },
     },
@@ -102,7 +107,6 @@ return {
     {
         "nvim-tree/nvim-tree.lua",
         dependencies = { "nvim-tree/nvim-web-devicons" },
-        -- Garante registro de comandos para o dashboard
         cmd = {
             "NvimTreeToggle",
             "NvimTreeFocus",
@@ -111,20 +115,14 @@ return {
             "NvimTreeClose"
         },
         keys = {
-            { "<leader>e",  "<cmd>NvimTreeToggle<cr>",   desc = "Explorador (toggle)" },
-            { "<leader>E",  "<cmd>NvimTreeFocus<cr>",    desc = "Foca no explorador" },
-            { "<leader>ef", "<cmd>NvimTreeFindFile<cr>", desc = "Acha arquivo no explorador" },
+            { "<leader>e", "<cmd>NvimTreeToggle<cr>", desc = "Explorador" },
         },
         opts = {
-            sort      = { sorter = "case_sensitive" },
-            view      = { width = 35 },
-            renderer  = {
-                group_empty   = true,
-                highlight_git = true,
-            },
-            filters   = { dotfiles = false },
-            git       = { enable = true },
-            actions   = { open_file = { quit_on_open = false } },
+            sort = { sorter = "case_sensitive" },
+            view = { width = 35 },
+            renderer = { highlight_git = true },
+            git = { enable = true },
+            actions = { open_file = { quit_on_open = false } },
         },
     },
 
@@ -133,12 +131,10 @@ return {
     -- =========================================================================
     {
         "goolord/alpha-nvim",
-        event        = "VimEnter",
+        event = "VimEnter",
         dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function()
-            local alpha     = require("alpha")
             local dashboard = require("alpha.themes.dashboard")
-
             dashboard.section.header.val = {
                 "                                                     ",
                 "  ███╗   ██╗ █████╗ ██████╗ ██╗   ██╗██████╗       ",
@@ -149,7 +145,6 @@ return {
                 "  ╚═╝  ╚═══╝╚═╝  ╚═╝╚═════╝  ╚═════╝ ╚═╝  ╚═╝      ",
                 "                                                     ",
             }
-
             dashboard.section.buttons.val = {
                 dashboard.button("f", "  Buscar arquivo",    "<cmd>Telescope find_files<cr>"),
                 dashboard.button("r", "  Arquivos recentes", "<cmd>Telescope oldfiles<cr>"),
@@ -159,18 +154,7 @@ return {
                 dashboard.button("c", "  Configuração",      "<cmd>e $MYVIMRC<cr>"),
                 dashboard.button("q", "  Sair",              "<cmd>qa<cr>"),
             }
-
-            -- Rodapé seguro
-            local stats_ok, lazy = pcall(require, "lazy")
-            if stats_ok then
-                local stats = lazy.stats()
-                dashboard.section.footer.val = string.format(
-                    "  %d plugins • %.2fms", stats.loaded, stats.startuptime
-                )
-            end
-
-            dashboard.section.footer.opts.hl = "Comment"
-            alpha.setup(dashboard.opts)
+            require("alpha").setup(dashboard.opts)
         end,
     },
 
@@ -180,58 +164,63 @@ return {
     {
         "folke/which-key.nvim",
         event = "VeryLazy",
-        opts  = {
-            delay   = 300,
-            plugins = { marks = true, registers = true },
-            icons   = { breadcrumb = "»", separator = "→", group = "+" },
+        opts = {
+            delay = 300,
+            icons = { breadcrumb = "»", separator = "→", group = "+" },
         },
         config = function(_, opts)
             local wk = require("which-key")
             wk.setup(opts)
             wk.add({
-                { "<leader>b",  group = "Buffer" },
-                { "<leader>c",  group = "Código / LSP" },
-                { "<leader>d",  group = "Debug" },
-                { "<leader>f",  group = "Buscar (Telescope)" },
-                { "<leader>g",  group = "Git" },
-                { "<leader>h",  group = "Git hunks" },
-                { "<leader>l",  group = "LSP" },
-                { "<leader>n",  group = "Notificações" },
-                { "<leader>r",  group = "Renomear" },
-                { "<leader>s",  group = "Split / Sessão" },
-                { "<leader>t",  group = "Terminal / Toggle" },
-                { "<leader>x",  group = "Trouble / Erros" },
+                { "<leader>f", group = "Busca (Telescope)" },
+                { "<leader>c", group = "Código" },
+                { "<leader>g", group = "Git" },
+                { "<leader>x", group = "Erros" },
             })
         end,
     },
 
-    -- = :Notificações (Noice)
+    -- =========================================================================
+    -- NOICE + NOTIFY
+    -- =========================================================================
     {
         "folke/noice.nvim",
-        event        = "VeryLazy",
+        event = "VeryLazy",
         dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" },
         opts = {
             lsp = {
                 override = {
                     ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
-                    ["vim.lsp.util.stylize_markdown"]                = true,
-                    ["cmp.entry.get_documentation"]                  = true,
+                    ["vim.lsp.util.stylize_markdown"] = true,
+                    ["cmp.entry.get_documentation"] = true,
                 },
             },
             presets = {
-                bottom_search         = true,
-                command_palette       = true,
-                lsp_doc_border        = true,
+                bottom_search = true,
+                command_palette = true,
+                lsp_doc_border = true,
             },
-        },
-        keys = {
-            { "<leader>nm", "<cmd>Noice<cr>",        desc = "Histórico notificações" },
-            { "<leader>nd", "<cmd>NoiceDismiss<cr>", desc = "Descarta notificação" },
         },
     },
 
-    -- Utilitários de UI
-    { "lukas-reineke/indent-blankline.nvim", event = "BufReadPost", main = "ibl", opts = {} },
+    -- =========================================================================
+    -- OUTROS PLUGINS DE UI
+    -- =========================================================================
+    {
+        "lukas-reineke/indent-blankline.nvim",
+        event = "BufReadPost",
+        config = function()
+            -- Lógica robusta para encontrar o módulo (v2 vs v3)
+            local ok, ibl = pcall(require, "ibl")
+            if ok then
+                ibl.setup({ exclude = { filetypes = { "help", "alpha", "NvimTree" } } })
+            else
+                local ok2, indent_blankline = pcall(require, "indent_blankline")
+                if ok2 then indent_blankline.setup({}) end
+            end
+        end,
+    },
+
     { "NvChad/nvim-colorizer.lua", event = "BufReadPost", opts = { user_default_options = { tailwind = true } } },
     { "folke/todo-comments.nvim", dependencies = { "nvim-lua/plenary.nvim" }, event = "BufReadPost", opts = {} },
     { "stevearc/dressing.nvim", event = "VeryLazy", opts = {} },
