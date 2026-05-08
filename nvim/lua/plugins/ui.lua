@@ -52,12 +52,15 @@ return {
     {
         "nvim-lualine/lualine.nvim",
         event        = "VeryLazy",
-        dependencies = { "nvim-tree/nvim-web-devicons" },
+        dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin/nvim" },
         opts = {
             options = {
                 theme              = "catppuccin",
                 globalstatus       = true,
                 disabled_filetypes = { statusline = { "dashboard", "alpha" } },
+                -- Evita aviso sobre component_separators/section_separators
+                component_separators = { left = "|", right = "|" },
+                section_separators   = { left = "",  right = "" },
             },
             sections = {
                 lualine_a = { "mode" },
@@ -106,6 +109,9 @@ return {
     {
         "nvim-tree/nvim-tree.lua",
         dependencies = { "nvim-tree/nvim-web-devicons" },
+        -- cmd garante que :NvimTreeToggle funciona (ex: botão do dashboard)
+        -- sem cmd, o lazy só carrega via keys, e comandos diretos falham
+        cmd = { "NvimTreeToggle", "NvimTreeFocus", "NvimTreeFindFile", "NvimTreeOpen" },
         keys = {
             { "<leader>e",  "<cmd>NvimTreeToggle<cr>",   desc = "Explorador (toggle)" },
             { "<leader>E",  "<cmd>NvimTreeFocus<cr>",    desc = "Foca no explorador" },
@@ -199,16 +205,21 @@ return {
         config = function(_, opts)
             local wk = require("which-key")
             wk.setup(opts)
+
+            -- which-key v3: grupos são registrados via add() com spec de grupo
+            -- O campo "group" define o título que aparece no popup
             wk.add({
                 { "<leader>b",  group = "Buffer" },
                 { "<leader>c",  group = "Código / LSP" },
                 { "<leader>d",  group = "Debug" },
                 { "<leader>f",  group = "Buscar (Telescope)" },
                 { "<leader>g",  group = "Git" },
+                { "<leader>h",  group = "Git hunks" },
                 { "<leader>l",  group = "LSP" },
+                { "<leader>n",  group = "Notificações" },
                 { "<leader>r",  group = "Renomear" },
                 { "<leader>s",  group = "Split / Sessão" },
-                { "<leader>t",  group = "Terminal" },
+                { "<leader>t",  group = "Terminal / Toggle" },
                 { "<leader>x",  group = "Trouble / Erros" },
             })
         end,

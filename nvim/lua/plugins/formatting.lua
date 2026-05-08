@@ -81,8 +81,8 @@ return {
                 python     = { "ruff" },    -- ruff é muito mais rápido que pylint
                 javascript = { "eslint_d" },
                 typescript = { "eslint_d" },
-                c          = { "cppcheck" },
-                cpp        = { "cppcheck" },
+                -- C/C++: usa clangd + clang-tidy (configurado no lsp.lua)
+                -- cppcheck não está no Mason; use :Mason pra instalar cpplint se quiser
                 bash       = { "shellcheck" },
                 sh         = { "shellcheck" },
             }
@@ -121,6 +121,7 @@ return {
                 "clang-format",-- C/C++
                 "shfmt",       -- Shell
                 -- Linters
+                -- "cpplint",   -- C/C++ (opcional, instale via :Mason se quiser)
                 "shellcheck",  -- Shell
                 "eslint_d",    -- JS/TS (versão daemon, muito rápida)
             },
