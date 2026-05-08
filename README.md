@@ -1,58 +1,62 @@
-# 🌌 Makom Kodesh - Dotfiles Unificados
+# Nabur's Neovim Config
 
-Ambiente de desenvolvimento unificando ZSH e Neovim. Focado em performance e portabilidade.
+Config completa pra programar C, C++, Python, Lua, JS/TS, Bash, Portugol.
+Funciona em Arch, Ubuntu, Fedora.
 
----
-
-## 🚀 Instalação
+## Instalação rápida
 
 ```bash
-git clone git@github.com:walbarellos/nvim-walbarellos.git
-cd nvim-walbarellos
 bash install.sh
 ```
 
-**Conteúdo do instalador:**
-1. **Backup**: Cria arquivos `.bak` para configurações existentes.
-2. **ZSH**: Instala `.zshrc` e plugins (autosuggestions, syntax highlighting).
-3. **Neovim**: Instala a configuração modular em `~/.config/nvim`.
-4. **Plugins**: Gerenciados via `lazy.nvim`, instalados no primeiro boot.
+## Estrutura
 
----
+```
+├── init.lua                  # Ponto de entrada
+├── lua/
+│   ├── core/
+│   │   ├── options.lua       # Configurações do editor
+│   │   ├── keymaps.lua       # Atalhos base
+│   │   └── autocmds.lua      # Automações
+│   └── plugins/
+│       ├── ui.lua            # Tema, statusline, explorador, dashboard
+│       ├── telescope.lua     # Busca de arquivos e texto
+│       ├── treesitter.lua    # Sintaxe e text objects
+│       ├── lsp.lua           # Language servers (erros, autocomplete)
+│       ├── completion.lua    # Menu de autocomplete
+│       ├── editor.lua        # autopairs, surround, comment, flash
+│       ├── formatting.lua    # Formatação e linting
+│       ├── git.lua           # gitsigns, lazygit, diffview
+│       ├── terminal.lua      # Terminal flutuante
+│       └── debug.lua         # Debugger (DAP)
+└── after/syntax/
+    └── portugol.vim          # Highlight pra Portugol
+```
 
-## 🛠️ Neovim: Atalhos e Plugins
+## Atalhos principais
 
-### 🎹 Comandos Base
-* **Leader Key**: `<Espaço>`
-* **Menu de Atalhos**: Pressione `<Espaço>` e aguarde para abrir o `which-key`.
+| Tecla         | Ação                        |
+|---------------|-----------------------------|
+| `<Space>?`    | Ver todos os atalhos        |
+| `<Space>ff`   | Buscar arquivo              |
+| `<Space>fg`   | Buscar texto no projeto     |
+| `<Space>e`    | Explorador de arquivos      |
+| `<C-\>`       | Terminal flutuante          |
+| `<Space>lg`   | LazyGit                     |
+| `<Space>L`    | Lazy (gerenciador plugins)  |
+| `<Space>M`    | Mason (gerenciador LSPs)    |
+| `gd`          | Ir pra definição            |
+| `K`           | Documentação hover          |
+| `<Space>ca`   | Code action                 |
+| `<Space>rn`   | Renomeia símbolo            |
+| `<Space>cf`   | Formata arquivo             |
+| `<Space>xx`   | Lista de erros              |
+| `gcc`         | Comenta linha               |
+| `s`           | Flash: pula pra qualquer lugar |
+| `]h` / `[h`   | Navega entre hunks git      |
 
-### 🔍 Navegação (Telescope)
-| Atalho | Ação |
-| :--- | :--- |
-| `<Espaço> ff` | Busca arquivos pelo nome. |
-| `<Espaço> fg` | Busca texto (grep) em todos os arquivos. |
-| `<Espaço> fr` | Abre arquivos recentes. |
-| `<Espaço> e`  | Alterna o explorador de arquivos (NvimTree). |
+## Requisitos
 
-### ⚡ Plugins de Elite
-* **Flash (`s`)**: Teletransporte de cursor.
-* **Autopairs**: Fechamento automático de delimitadores.
-* **GitSigns**: Indicadores de alteração Git na margem da linha.
-
----
-
-## 🎨 Personalização
-
-### Tema: Catppuccin (Mocha)
-Para alterar o estilo:
-1. Edite `~/.config/nvim/lua/plugins/ui.lua`.
-2. Altere `flavour = "mocha"` para `macchiato`, `frappe` ou `latte`.
-
----
-
-## 📦 Inventário de Plugins
-* **LSP**: `nvim-lspconfig`, `mason.nvim`, `lspsaga.nvim`.
-* **Sintaxe**: `nvim-treesitter`.
-* **Interface**: `lualine`, `bufferline`, `noice.nvim`, `nvim-tree`.
-* **Busca**: `telescope.nvim`.
-* **Utilidades**: `trouble.nvim`, `gitsigns.nvim`, `flash.nvim`, `autopairs`.
+- Neovim ≥ 0.9
+- Nerd Font no terminal ([nerdfonts.com](https://www.nerdfonts.com/))
+- git, curl, node, python3, gcc, ripgrep
