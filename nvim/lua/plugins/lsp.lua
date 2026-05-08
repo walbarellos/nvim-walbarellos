@@ -100,6 +100,7 @@ return {
                 map("]d",         vim.diagnostic.goto_next,      "Próximo erro")
                 map("<leader>cd", vim.diagnostic.open_float,    "Ver erro (float)")
                 map("<leader>cl", "<cmd>Telescope diagnostics<cr>", "Lista de erros")
+                map("<leader>ws", vim.lsp.buf.workspace_symbol, "Busca símbolo no workspace")
 
                 if client.server_capabilities.documentHighlightProvider then
                     vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
@@ -129,7 +130,17 @@ return {
             end
 
             -- Ativação dos servidores
-            setup("clangd")
+            setup("clangd", {
+                cmd = {
+                    "clangd",
+                    "--background-index",
+                    "--clang-tidy",
+                    "--header-insertion=iwyu",
+                    "--completion-style=detailed",
+                    "--function-arg-placeholders",
+                    "--fallback-style=llvm",
+                }
+            })
             setup("basedpyright")
             setup("lua_ls", {
                 settings = {
@@ -179,6 +190,8 @@ return {
             { "<leader>pd",  "<cmd>Lspsaga peek_definition<cr>",  desc = "LSP: Peek definition" },
             { "<leader>pt",  "<cmd>Lspsaga peek_type_definition<cr>", desc = "LSP: Peek type" },
             { "<leader>of",  "<cmd>Lspsaga outline<cr>",          desc = "LSP: Outline" },
+            { "[e",          "<cmd>Lspsaga diagnostic_jump_prev<cr>", desc = "Erro anterior" },
+            { "]e",          "<cmd>Lspsaga diagnostic_jump_next<cr>", desc = "Próximo erro" },
         },
     },
 
@@ -192,6 +205,9 @@ return {
         keys = {
             { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnósticos (projeto)" },
             { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Diagnósticos (arquivo)" },
+            { "<leader>xs", "<cmd>Trouble symbols toggle<cr>",                  desc = "Símbolos" },
+            { "<leader>xl", "<cmd>Trouble lsp toggle<cr>",                      desc = "LSP" },
+            { "<leader>xq", "<cmd>Trouble qflist toggle<cr>",                   desc = "Quickfix" },
         },
         opts = { use_diagnostic_signs = true },
     },
