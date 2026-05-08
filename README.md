@@ -102,6 +102,12 @@ tornar o ZSH o shell padrão:
 CHANGE_SHELL=1 bash install.sh
 ```
 
+Para instalar apenas a Nerd Font, sem mexer no ZSH nem no Neovim:
+
+```bash
+bash install.sh --fonts-only
+```
+
 ## Requisitos
 
 - Neovim 0.9 ou superior.
@@ -986,7 +992,44 @@ Exemplo real desta configuração:
 
 ### Ícones estranhos ou quadrados
 
-Instale e selecione uma Nerd Font no terminal.
+Isso significa que o terminal não está usando uma Nerd Font.
+
+O instalador tenta instalar `JetBrainsMono Nerd Font`. Depois disso, selecione
+essa fonte no seu terminal.
+
+No Ubuntu, a forma automatizada é:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y curl unzip fontconfig
+bash install.sh --fonts-only
+```
+
+Depois selecione no terminal:
+
+```text
+JetBrainsMono Nerd Font Mono
+```
+
+No Konsole, comum em KDE/EndeavourOS:
+
+1. Abra o Konsole.
+2. Vá em `Configurações`.
+3. Abra `Gerenciar perfis`.
+4. Edite o perfil atual.
+5. Vá em `Aparência`.
+6. Escolha `JetBrainsMono Nerd Font`.
+7. Feche e abra o terminal de novo.
+
+Para verificar se alguma Nerd Font existe:
+
+```bash
+fc-list | grep -i "Nerd Font"
+```
+
+Se os ícones ainda aparecerem como quadrados, o problema quase sempre é o perfil
+do terminal ainda usando fonte comum, como `Hack`, `Monospace` ou `DejaVu Sans
+Mono`.
 
 ### LSP não funciona
 

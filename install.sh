@@ -62,7 +62,7 @@ install_packages() {
         run_pkg pacman -Sy --needed --noconfirm \
             neovim zsh git curl nodejs npm python-pip python-virtualenv \
             ripgrep fd fzf lazygit xclip wl-clipboard base-devel unzip \
-            gcc clang gdb cmake valgrind
+            gcc clang gdb cmake valgrind fontconfig ttf-jetbrains-mono-nerd
         return
     fi
 
@@ -71,7 +71,7 @@ install_packages() {
         run_pkg apt-get install -y \
             zsh git curl nodejs npm python3-pip python3-venv \
             ripgrep fd-find fzf xclip wl-clipboard build-essential unzip \
-            gcc clang gdb cmake valgrind
+            gcc clang gdb cmake valgrind fontconfig fonts-firacode
 
         install_optional_apt_package neovim
         install_optional_apt_package lazygit
@@ -90,7 +90,8 @@ install_packages() {
         run_pkg dnf install -y \
             neovim zsh git curl nodejs npm python3-pip \
             ripgrep fd-find fzf lazygit xclip wl-clipboard \
-            gcc gcc-c++ clang gdb cmake valgrind make unzip
+            gcc gcc-c++ clang gdb cmake valgrind make unzip fontconfig \
+            jetbrains-mono-fonts-all
         return
     fi
 
@@ -98,7 +99,8 @@ install_packages() {
         run_pkg zypper --non-interactive install \
             neovim zsh git curl nodejs npm python3-pip \
             ripgrep fd fzf xclip wl-clipboard \
-            gcc gcc-c++ clang gdb cmake valgrind make unzip
+            gcc gcc-c++ clang gdb cmake valgrind make unzip fontconfig \
+            jetbrains-mono-fonts
         if zypper search -x lazygit >/dev/null 2>&1; then
             run_pkg zypper --non-interactive install lazygit
         else
@@ -111,7 +113,7 @@ install_packages() {
         run_pkg apk add --no-cache \
             neovim zsh git curl nodejs npm py3-pip \
             ripgrep fd fzf lazygit xclip wl-clipboard build-base unzip \
-            gcc clang gdb cmake valgrind
+            gcc clang gdb cmake valgrind fontconfig
         return
     fi
 
@@ -119,12 +121,36 @@ install_packages() {
         run_pkg xbps-install -Sy \
             neovim zsh git curl nodejs npm python3-pip \
             ripgrep fd fzf lazygit xclip wl-clipboard base-devel unzip \
-            gcc clang gdb cmake valgrind
+            gcc clang gdb cmake valgrind fontconfig
         return
     fi
 
     warn "Gerenciador de pacotes não suportado automaticamente para ID='$ID' ID_LIKE='${ID_LIKE:-}'."
-    warn "Instale manualmente: neovim zsh git curl nodejs npm python3 pip ripgrep fd fzf lazygit xclip wl-clipboard gcc clang gdb cmake valgrind make unzip."
+    warn "Instale manualmente: neovim zsh git curl nodejs npm python3 pip ripgrep fd fzf lazygit xclip wl-clipboard gcc clang gdb cmake valgrind make unzip fontconfig e uma Nerd Font."
+}
+
+install_user_nerd_font() {
+    if command -v fc-list >/dev/null 2>&1 && fc-list | grep -qi "Nerd Font"; then
+        success "Nerd Font já encontrada no sistema."
+        return
+    fi
+
+    info "Instalando JetBrainsMono Nerd Font para o usuário atual..."
+
+    local font_dir="$HOME/.local/share/fonts/JetBrainsMonoNerdFont"
+    local zip_path="/tmp/JetBrainsMonoNerdFont.zip"
+
+    mkdir -p "$font_dir"
+    curl -L -o "$zip_path" \
+        https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
+    unzip -o "$zip_path" -d "$font_dir" >/dev/null
+    rm -f "$zip_path"
+
+    if command -v fc-cache >/dev/null 2>&1; then
+        fc-cache -f "$HOME/.local/share/fonts"
+    fi
+
+    success "JetBrainsMono Nerd Font instalada em $font_dir"
 }
 
 backup_path() {
@@ -187,7 +213,18 @@ install_neovim_config() {
     success "Configuração instalada em $nvim_dir"
 }
 
+if [[ "${1:-}" == "--fonts-only" ]]; then
+    install_user_nerd_font
+    echo "-------------------------------------------------------"
+    echo "• Fonte instalada/validada."
+    echo "• Selecione 'JetBrainsMono Nerd Font Mono' no terminal."
+    echo "• Feche e abra o terminal depois da troca."
+    echo "-------------------------------------------------------"
+    exit 0
+fi
+
 install_packages
+install_user_nerd_font
 install_zsh_config
 install_neovim_config
 
