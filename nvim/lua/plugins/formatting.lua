@@ -121,7 +121,6 @@ return {
                 "clang-format",-- C/C++
                 "shfmt",       -- Shell
                 -- Linters
-                "cppcheck",    -- C/C++
                 "shellcheck",  -- Shell
                 "eslint_d",    -- JS/TS (versão daemon, muito rápida)
             },
