@@ -1,16 +1,25 @@
 -- =============================================================================
--- LSP (Language Server Protocol) (lua/plugins/lsp.lua)
+-- LSP (lua/plugins/lsp.lua)
 -- =============================================================================
+-- Language Server Protocol: erros em tempo real, go-to-definition,
+-- rename, code actions, hover docs, etc.
+--
+-- NOTA: nvim-lspconfig v3.x mudou a API.
+--   Antigo (deprecated): require('lspconfig').clangd.setup({})
+--   Novo:                vim.lsp.config('clangd', {}) + vim.lsp.enable('clangd')
+--
+-- Mason instala os servidores automaticamente.
+-- mason-lspconfig faz a ponte entre Mason e lspconfig.
 
 return {
 
     -- =========================================================================
-    -- MASON (instalador de LSPs, formatters, linters)
+    -- MASON - instala LSPs, formatters, linters
+    -- :Mason pra abrir a interface
     -- =========================================================================
     {
         "williamboman/mason.nvim",
-        cmd  = "Mason",
-        keys = { { "<leader>M", "<cmd>Mason<cr>", desc = "Abre Mason" } },
+        cmd   = "Mason",
         build = ":MasonUpdate",
         opts  = {
             ui = {
@@ -25,30 +34,32 @@ return {
     },
 
     -- =========================================================================
-    -- MASON-LSPCONFIG
+    -- MASON-LSPCONFIG - integra Mason com lspconfig
     -- =========================================================================
     {
         "williamboman/mason-lspconfig.nvim",
         dependencies = { "williamboman/mason.nvim" },
         opts = {
+            -- Instala automaticamente ao abrir nvim
             ensure_installed = {
-                "clangd",
-                "basedpyright",
-                "lua_ls",
-                "ts_ls",
-                "html",
-                "cssls",
-                "jsonls",
-                "yamlls",
-                "bashls",
-                "marksman",
+                "clangd",        -- C/C++
+                "basedpyright",  -- Python
+                "lua_ls",        -- Lua (pra editar config nvim)
+                "ts_ls",         -- TypeScript/JavaScript
+                "html",          -- HTML
+                "cssls",         -- CSS
+                "jsonls",        -- JSON
+                "yamlls",        -- YAML
+                "bashls",        -- Bash/Shell
+                "marksman",      -- Markdown
+                -- "kotlin_language_server",  -- Kotlin (pesado, descomente se usar)
             },
-            automatic_installation = true,
+            automatic_enable = true,   -- nova API: habilita servidores automaticamente
         },
     },
 
     -- =========================================================================
-    -- NVIM-LSPCONFIG
+    -- NVIM-LSPCONFIG - configura os servidores
     -- =========================================================================
     {
         "neovim/nvim-lspconfig",
@@ -60,77 +71,78 @@ return {
             "b0o/SchemaStore.nvim",
         },
         config = function()
-            local lspconfig = require("lspconfig")
-            local cmp_lsp = require("cmp_nvim_lsp")
+            -- ---------------------------------------------------------------
+            -- CAPACIDADES (o que o nvim suporta)
+            -- ---------------------------------------------------------------
+            local capabilities = vim.tbl_deep_extend(
+                "force",
+                vim.lsp.protocol.make_client_capabilities(),
+                require("cmp_nvim_lsp").default_capabilities()
+            )
 
-            -- Configuração global de diagnósticos
+            -- ---------------------------------------------------------------
+            -- ON_ATTACH - roda quando LSP conecta num buffer
+            -- ---------------------------------------------------------------
+            local on_attach = function(_, bufnr)
+                local map = function(keys, func, desc)
+                    vim.keymap.set("n", keys, func, {
+                        buffer = bufnr,
+                        desc   = "LSP: " .. desc,
+                        silent = true,
+                    })
+                end
+
+                -- Navegação
+                map("gd",  vim.lsp.buf.definition,     "Ir pra definição")
+                map("gD",  vim.lsp.buf.declaration,    "Ir pra declaração")
+                map("gi",  vim.lsp.buf.implementation, "Ir pra implementação")
+                map("gt",  vim.lsp.buf.type_definition,"Ir pro tipo")
+                map("gr",  "<cmd>Telescope lsp_references<cr>", "Ver referências")
+
+                -- Documentação
+                map("K",    vim.lsp.buf.hover,          "Documentação hover")
+                map("<C-k>",vim.lsp.buf.signature_help, "Assinatura")
+
+                -- Ações
+                map("<leader>ca", vim.lsp.buf.code_action, "Code action")
+                map("<leader>rn", vim.lsp.buf.rename,      "Renomeia símbolo")
+                map("<leader>cf", function()
+                    vim.lsp.buf.format({ async = true })
+                end, "Formata arquivo")
+
+                -- Diagnósticos
+                map("[d",         vim.diagnostic.goto_prev,  "Erro anterior")
+                map("]d",         vim.diagnostic.goto_next,  "Próximo erro")
+                map("<leader>cd", vim.diagnostic.open_float, "Ver erro")
+                map("<leader>cl", "<cmd>Telescope diagnostics<cr>", "Lista erros")
+            end
+
+            -- ---------------------------------------------------------------
+            -- APARÊNCIA DOS DIAGNÓSTICOS
+            -- ---------------------------------------------------------------
             vim.diagnostic.config({
-                virtual_text = { prefix = "●", spacing = 4 },
-                signs = true,
-                underline = true,
+                virtual_text     = { prefix = "●", spacing = 4 },
+                signs            = true,
+                underline        = true,
                 update_in_insert = false,
-                severity_sort = true,
-                float = { border = "rounded", source = "always" },
+                severity_sort    = true,
+                float            = { border = "rounded", source = "always" },
             })
 
-            -- Ícones nos diagnósticos
             local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
             for type, icon in pairs(signs) do
                 local hl = "DiagnosticSign" .. type
                 vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
             end
 
-            -- Atalhos ao anexar LSP
-            local on_attach = function(client, bufnr)
-                local map = function(keys, func, desc)
-                    vim.keymap.set("n", keys, func, { buffer = bufnr, desc = "LSP: " .. desc })
-                end
+            -- ---------------------------------------------------------------
+            -- CONFIGURAÇÃO DOS SERVIDORES (nova API vim.lsp.config)
+            -- ---------------------------------------------------------------
 
-                map("gd",         vim.lsp.buf.definition,        "Ir pra definição")
-                map("gD",         vim.lsp.buf.declaration,       "Ir pra declaração")
-                map("gi",         vim.lsp.buf.implementation,    "Ir pra implementação")
-                map("gt",         vim.lsp.buf.type_definition,   "Ir pro tipo")
-                map("gr",         "<cmd>Telescope lsp_references<cr>", "Ver referências")
-                map("K",          vim.lsp.buf.hover,             "Documentação (hover)")
-                map("<C-k>",      vim.lsp.buf.signature_help,    "Ajuda de assinatura")
-                map("<leader>ca", vim.lsp.buf.code_action,       "Code action")
-                map("<leader>rn", vim.lsp.buf.rename,            "Renomeia símbolo")
-                map("<leader>cf", function() vim.lsp.buf.format({ async = true }) end, "Formata arquivo")
-                map("[d",         vim.diagnostic.goto_prev,      "Erro anterior")
-                map("]d",         vim.diagnostic.goto_next,      "Próximo erro")
-                map("<leader>cd", vim.diagnostic.open_float,    "Ver erro (float)")
-                map("<leader>cl", "<cmd>Telescope diagnostics<cr>", "Lista de erros")
-                map("<leader>ws", vim.lsp.buf.workspace_symbol, "Busca símbolo no workspace")
-
-                if client.server_capabilities.documentHighlightProvider then
-                    vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-                        buffer = bufnr,
-                        callback = vim.lsp.buf.document_highlight,
-                    })
-                    vim.api.nvim_create_autocmd("CursorMoved", {
-                        buffer = bufnr,
-                        callback = vim.lsp.buf.clear_references,
-                    })
-                end
-            end
-
-            local capabilities = vim.tbl_deep_extend(
-                "force",
-                vim.lsp.protocol.make_client_capabilities(),
-                cmp_lsp.default_capabilities()
-            )
-
-            -- Configuração padrão para os servidores
-            local function setup(server, opts)
-                opts = vim.tbl_deep_extend("force", {
-                    on_attach = on_attach,
-                    capabilities = capabilities,
-                }, opts or {})
-                lspconfig[server].setup(opts)
-            end
-
-            -- Ativação dos servidores
-            setup("clangd", {
+            -- C/C++
+            vim.lsp.config("clangd", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
                 cmd = {
                     "clangd",
                     "--background-index",
@@ -139,76 +151,151 @@ return {
                     "--completion-style=detailed",
                     "--function-arg-placeholders",
                     "--fallback-style=llvm",
-                }
+                },
+                root_markers = {
+                    "compile_commands.json", "compile_flags.txt",
+                    "CMakeLists.txt", ".git",
+                },
+                filetypes = { "c", "cpp", "objc", "objcpp" },
+                init_options = {
+                    usePlaceholders    = true,
+                    completeUnimported = true,
+                },
             })
-            setup("basedpyright")
-            setup("lua_ls", {
+
+            -- Python
+            vim.lsp.config("basedpyright", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
                 settings = {
-                    Lua = {
-                        runtime = { version = "LuaJIT" },
-                        workspace = { checkThirdParty = false, library = { vim.env.VIMRUNTIME } },
-                        diagnostics = { globals = { "vim" } },
+                    basedpyright = {
+                        analysis = {
+                            autoSearchPaths        = true,
+                            diagnosticMode         = "workspace",
+                            useLibraryCodeForTypes = true,
+                            typeCheckingMode       = "basic",
+                        },
                     },
                 },
             })
-            setup("ts_ls")
-            setup("html")
-            setup("cssls")
-            setup("jsonls", { settings = { json = { schemas = require("schemastore").json.schemas(), validate = { enable = true } } } })
-            setup("yamlls", { settings = { yaml = { schemas = require("schemastore").yaml.schemas() } } })
-            setup("bashls")
-            setup("marksman")
+
+            -- Lua
+            vim.lsp.config("lua_ls", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+                settings = {
+                    Lua = {
+                        runtime  = { version = "LuaJIT" },
+                        workspace = {
+                            checkThirdParty = false,
+                            library = {
+                                vim.env.VIMRUNTIME,
+                                "${3rd}/luv/library",
+                            },
+                        },
+                        completion  = { callSnippet = "Replace" },
+                        diagnostics = { globals = { "vim" } },
+                        telemetry   = { enable = false },
+                    },
+                },
+            })
+
+            -- TypeScript/JavaScript
+            vim.lsp.config("ts_ls", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+                settings = {
+                    typescript = {
+                        inlayHints = {
+                            includeInlayParameterNameHints = "all",
+                        },
+                    },
+                },
+            })
+
+            -- HTML
+            vim.lsp.config("html", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+                filetypes    = { "html", "htmldjango" },
+            })
+
+            -- CSS
+            vim.lsp.config("cssls", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+            })
+
+            -- JSON com schemas
+            vim.lsp.config("jsonls", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+                settings = {
+                    json = {
+                        schemas  = require("schemastore").json.schemas(),
+                        validate = { enable = true },
+                    },
+                },
+            })
+
+            -- YAML com schemas
+            vim.lsp.config("yamlls", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+                settings = {
+                    yaml = {
+                        schemaStore = { enable = false, url = "" },
+                        schemas     = require("schemastore").yaml.schemas(),
+                    },
+                },
+            })
+
+            -- Bash
+            vim.lsp.config("bashls", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+            })
+
+            -- Markdown
+            vim.lsp.config("marksman", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+            })
+
         end,
     },
 
     -- =========================================================================
-    -- CLANGD EXTENSIONS
-    -- =========================================================================
-    {
-        "p00f/clangd_extensions.nvim",
-        ft = { "c", "cpp" },
-        opts = { memory_usage = { border = "rounded" } },
-    },
-
-    -- =========================================================================
-    -- SCHEMASTORE
+    -- SCHEMASTORE - schemas pra JSON/YAML
+    -- Autocompletar em package.json, docker-compose.yml, etc.
     -- =========================================================================
     { "b0o/SchemaStore.nvim", lazy = true },
 
     -- =========================================================================
-    -- LSP SAGA
-    -- =========================================================================
-    {
-        "nvimdev/lspsaga.nvim",
-        event = "LspAttach",
-        dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
-        opts = { ui = { border = "rounded" }, lightbulb = { enable = true } },
-        keys = {
-            { "gh",          "<cmd>Lspsaga hover_doc<cr>",        desc = "LSP: Hover doc" },
-            { "<leader>ca",  "<cmd>Lspsaga code_action<cr>",      desc = "LSP: Code action" },
-            { "<leader>rn",  "<cmd>Lspsaga rename<cr>",           desc = "LSP: Rename" },
-            { "<leader>pd",  "<cmd>Lspsaga peek_definition<cr>",  desc = "LSP: Peek definition" },
-            { "<leader>pt",  "<cmd>Lspsaga peek_type_definition<cr>", desc = "LSP: Peek type" },
-            { "<leader>of",  "<cmd>Lspsaga outline<cr>",          desc = "LSP: Outline" },
-            { "[e",          "<cmd>Lspsaga diagnostic_jump_prev<cr>", desc = "Erro anterior" },
-            { "]e",          "<cmd>Lspsaga diagnostic_jump_next<cr>", desc = "Próximo erro" },
-        },
-    },
-
-    -- =========================================================================
-    -- TROUBLE
+    -- TROUBLE - lista bonita de erros/diagnósticos
+    -- <Space>xx = erros do projeto
+    -- <Space>xX = erros do arquivo atual
     -- =========================================================================
     {
         "folke/trouble.nvim",
         dependencies = { "nvim-tree/nvim-web-devicons" },
-        cmd  = { "Trouble" },
+        cmd  = "Trouble",
         keys = {
-            { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnósticos (projeto)" },
+            { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>",              desc = "Diagnósticos (projeto)" },
             { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Diagnósticos (arquivo)" },
-            { "<leader>xs", "<cmd>Trouble symbols toggle<cr>",                  desc = "Símbolos" },
-            { "<leader>xl", "<cmd>Trouble lsp toggle<cr>",                      desc = "LSP" },
             { "<leader>xq", "<cmd>Trouble qflist toggle<cr>",                   desc = "Quickfix" },
         },
-        opts = { use_diagnostic_signs = true },
+        opts = {},
     },
+
+    -- =========================================================================
+    -- CLANGD EXTENSIONS - extras pra C/C++
+    -- Inlay hints, type hierarchy, AST view
+    -- =========================================================================
+    {
+        "p00f/clangd_extensions.nvim",
+        ft   = { "c", "cpp" },
+        opts = {},
+    },
+
 }
