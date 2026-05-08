@@ -192,6 +192,21 @@ cdebug programa
 cleak programa
 ```
 
+Dentro do Neovim, com um arquivo `.c` aberto:
+
+| Atalho | Ação |
+| --- | --- |
+| `<Space>rr` | Salva, compila e executa o arquivo C atual |
+| `<Space>rc` | Salva e compila o arquivo C atual |
+| `<Space>rg` | Salva, compila e abre no `gdb` |
+| `<Space>rv` | Salva, compila e roda com `valgrind` |
+
+Exemplo: se o arquivo aberto for `aula1.c`, `<Space>rr` roda algo equivalente a:
+
+```bash
+gcc aula1.c -Wall -Wextra -std=c11 -g -o aula1 && ./aula1
+```
+
 Para projetos com múltiplos arquivos:
 
 ```bash
@@ -768,6 +783,10 @@ Atalhos:
 | `<Space>th` | Terminal horizontal |
 | `<Space>tv` | Terminal vertical |
 | `<Space>tn` | Novo terminal numerado |
+| `<Space>rr` | C: compila e roda arquivo atual |
+| `<Space>rc` | C: compila arquivo atual |
+| `<Space>rg` | C: compila e abre gdb |
+| `<Space>rv` | C: compila e roda valgrind |
 | `<Esc><Esc>` | Sai do modo terminal |
 
 Dentro do terminal, também é possível navegar para splits com:
