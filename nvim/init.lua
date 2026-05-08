@@ -17,6 +17,15 @@ require("core.options")
 require("core.keymaps")
 require("core.autocmds")
 
+-- FIX: Compatibilidade entre Telescope e Treesitter v0.12+
+-- O Telescope 0.1.x usa uma função que foi removida no Treesitter novo.
+local ts_utils = pcall(require, "nvim-treesitter.ts_utils")
+if ts_utils then
+    vim.treesitter.language.get_lang = vim.treesitter.language.get_lang or function(ft)
+        return require("nvim-treesitter.parsers").ft_to_lang(ft)
+    end
+end
+
 -- =============================================================================
 -- LAZY.NVIM - Gerenciador de plugins
 -- =============================================================================
