@@ -45,38 +45,28 @@ return {
         end,
     },
 
-    -- =========================================================================
-    -- STATUSLINE: LUALINE
-    -- Barra de baixo: modo, branch, erros, arquivo, posição
-    -- =========================================================================
+    -- Statusline Lualine
     {
         "nvim-lualine/lualine.nvim",
         event = "VeryLazy",
-        dependencies = { "nvim-tree/nvim-web-devicons" },
-        opts = function()
-            -- Tenta detectar se o catppuccin está disponível
-            local theme = "auto"
-            local status_ok, _ = pcall(require, "catppuccin")
-            if status_ok then theme = "catppuccin" end
-
-            return {
-                options = {
-                    theme              = theme,
-                    globalstatus       = true,
-                    disabled_filetypes = { statusline = { "dashboard", "alpha" } },
-                    component_separators = { left = "|", right = "|" },
-                    section_separators   = { left = "", right = "" },
-                },
-                sections = {
-                    lualine_a = { "mode" },
-                    lualine_b = { "branch", "diff", "diagnostics" },
-                    lualine_c = { { "filename", path = 1 } },
-                    lualine_x = { "encoding", "fileformat", "filetype" },
-                    lualine_y = { "progress" },
-                    lualine_z = { "location" },
-                },
-            }
-        end,
+        dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin/nvim" },
+        opts = {
+            options = {
+                theme = "catppuccin",
+                globalstatus = true,
+                disabled_filetypes = { statusline = { "dashboard", "alpha" } },
+                component_separators = { left = "|", right = "|" },
+                section_separators = { left = "", right = "" },
+            },
+            sections = {
+                lualine_a = { "mode" },
+                lualine_b = { "branch", "diff", "diagnostics" },
+                lualine_c = { { "filename", path = 1 } },
+                lualine_x = { "encoding", "fileformat", "filetype" },
+                lualine_y = { "progress" },
+                lualine_z = { "location" },
+            },
+        },
     },
 
     -- =========================================================================
