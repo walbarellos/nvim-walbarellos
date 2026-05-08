@@ -51,35 +51,40 @@ return {
     -- =========================================================================
     {
         "nvim-lualine/lualine.nvim",
-        event        = "VeryLazy",
-        dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin/nvim" },
-        opts = {
-            options = {
-                theme              = "catppuccin",
-                globalstatus       = true,
-                disabled_filetypes = { statusline = { "dashboard", "alpha" } },
-                -- Evita aviso sobre component_separators/section_separators
-                component_separators = { left = "|", right = "|" },
-                section_separators   = { left = "",  right = "" },
-            },
-            sections = {
-                lualine_a = { "mode" },
-                lualine_b = { "branch", "diff", "diagnostics" },
-                lualine_c = { { "filename", path = 1 } },
-                lualine_x = { "encoding", "fileformat", "filetype" },
-                lualine_y = { "progress" },
-                lualine_z = { "location" },
-            },
-        },
+        event = "VeryLazy",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        opts = function()
+            -- Tenta detectar se o catppuccin está disponível
+            local theme = "auto"
+            local status_ok, _ = pcall(require, "catppuccin")
+            if status_ok then theme = "catppuccin" end
+
+            return {
+                options = {
+                    theme              = theme,
+                    globalstatus       = true,
+                    disabled_filetypes = { statusline = { "dashboard", "alpha" } },
+                    component_separators = { left = "|", right = "|" },
+                    section_separators   = { left = "", right = "" },
+                },
+                sections = {
+                    lualine_a = { "mode" },
+                    lualine_b = { "branch", "diff", "diagnostics" },
+                    lualine_c = { { "filename", path = 1 } },
+                    lualine_x = { "encoding", "fileformat", "filetype" },
+                    lualine_y = { "progress" },
+                    lualine_z = { "location" },
+                },
+            }
+        end,
     },
 
     -- =========================================================================
     -- BUFFERLINE (abas de arquivo no topo)
-    -- Shift+l = próximo | Shift+h = anterior
     -- =========================================================================
     {
         "akinsho/bufferline.nvim",
-        event        = "BufAdd",   -- só carrega quando abrir um buffer (evita E85)
+        event        = "BufAdd",
         version      = "*",
         dependencies = { "nvim-tree/nvim-web-devicons" },
         opts = {
@@ -95,7 +100,6 @@ return {
                         separator = true,
                     },
                 },
-                -- Não mostra bufferline com 1 ou 0 buffers
                 show_tab_indicators         = true,
                 always_show_bufferline      = false,
             },
@@ -104,14 +108,18 @@ return {
 
     -- =========================================================================
     -- EXPLORADOR DE ARQUIVOS: NVIM-TREE
-    -- <Space>e = abre/fecha
     -- =========================================================================
     {
         "nvim-tree/nvim-tree.lua",
         dependencies = { "nvim-tree/nvim-web-devicons" },
-        -- cmd garante que :NvimTreeToggle funciona (ex: botão do dashboard)
-        -- sem cmd, o lazy só carrega via keys, e comandos diretos falham
-        cmd = { "NvimTreeToggle", "NvimTreeFocus", "NvimTreeFindFile", "NvimTreeOpen" },
+        -- Garante registro de comandos para o dashboard
+        cmd = {
+            "NvimTreeToggle",
+            "NvimTreeFocus",
+            "NvimTreeFindFile",
+            "NvimTreeOpen",
+            "NvimTreeClose"
+        },
         keys = {
             { "<leader>e",  "<cmd>NvimTreeToggle<cr>",   desc = "Explorador (toggle)" },
             { "<leader>E",  "<cmd>NvimTreeFocus<cr>",    desc = "Foca no explorador" },
@@ -132,16 +140,11 @@ return {
 
     -- =========================================================================
     -- TELA INICIAL: ALPHA-NVIM
-    -- Aparece quando você abre nvim sem arquivo
     -- =========================================================================
     {
         "goolord/alpha-nvim",
         event        = "VimEnter",
-        dependencies = {
-            "nvim-tree/nvim-web-devicons",
-            -- Telescope e NvimTree precisam estar disponíveis antes do alpha
-            -- Isso é garantido pelo lazy carregando na VimEnter
-        },
+        dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function()
             local alpha     = require("alpha")
             local dashboard = require("alpha.themes.dashboard")
@@ -158,27 +161,18 @@ return {
             }
 
             dashboard.section.buttons.val = {
-                dashboard.button("f", "  Buscar arquivo",
-                    "<cmd>Telescope find_files<cr>"),
-                dashboard.button("r", "  Arquivos recentes",
-                    "<cmd>Telescope oldfiles<cr>"),
-                dashboard.button("g", "  Buscar texto",
-                    "<cmd>Telescope live_grep<cr>"),
-                dashboard.button("e", "  Explorador",
-                    "<cmd>NvimTreeToggle<cr>"),
-                dashboard.button("s", "  Restaurar sessão",
-                    "<cmd>lua require('persistence').load()<cr>"),
-                dashboard.button("l", "  Plugins (Lazy)",
-                    "<cmd>Lazy<cr>"),
-                dashboard.button("c", "  Configuração",
-                    "<cmd>e $MYVIMRC<cr>"),
-                dashboard.button("q", "  Sair", "<cmd>qa<cr>"),
+                dashboard.button("f", "  Buscar arquivo",    "<cmd>Telescope find_files<cr>"),
+                dashboard.button("r", "  Arquivos recentes", "<cmd>Telescope oldfiles<cr>"),
+                dashboard.button("g", "  Buscar texto",      "<cmd>Telescope live_grep<cr>"),
+                dashboard.button("e", "  Explorador",        "<cmd>NvimTreeToggle<cr>"),
+                dashboard.button("s", "  Restaurar sessão",  "<cmd>lua require('persistence').load()<cr>"),
+                dashboard.button("c", "  Configuração",      "<cmd>e $MYVIMRC<cr>"),
+                dashboard.button("q", "  Sair",              "<cmd>qa<cr>"),
             }
 
-            -- Carrega alpha sem rodapé de stats pra evitar erro no primeiro boot
-            -- (lazy.stats pode não estar pronto ainda na VimEnter)
-            local ok, lazy = pcall(require, "lazy")
-            if ok then
+            -- Rodapé seguro
+            local stats_ok, lazy = pcall(require, "lazy")
+            if stats_ok then
                 local stats = lazy.stats()
                 dashboard.section.footer.val = string.format(
                     "  %d plugins • %.2fms", stats.loaded, stats.startuptime
@@ -191,8 +185,7 @@ return {
     },
 
     -- =========================================================================
-    -- WHICH-KEY - mostra atalhos disponíveis
-    -- Pressione <Space> e espere 300ms
+    -- WHICH-KEY
     -- =========================================================================
     {
         "folke/which-key.nvim",
@@ -205,9 +198,6 @@ return {
         config = function(_, opts)
             local wk = require("which-key")
             wk.setup(opts)
-
-            -- which-key v3: grupos são registrados via add() com spec de grupo
-            -- O campo "group" define o título que aparece no popup
             wk.add({
                 { "<leader>b",  group = "Buffer" },
                 { "<leader>c",  group = "Código / LSP" },
@@ -225,19 +215,7 @@ return {
         end,
     },
 
-    -- =========================================================================
-    -- NOICE + NOTIFY - notificações e cmdline modernos
-    -- =========================================================================
-    {
-        "rcarriga/nvim-notify",
-        lazy = true,
-        opts = {
-            timeout  = 3000,
-            max_width = 60,
-            render   = "compact",
-            stages   = "fade_in_slide_out",
-        },
-    },
+    -- = :Notificações (Noice)
     {
         "folke/noice.nvim",
         event        = "VeryLazy",
@@ -253,13 +231,7 @@ return {
             presets = {
                 bottom_search         = true,
                 command_palette       = true,
-                long_message_to_split = true,
                 lsp_doc_border        = true,
-            },
-            routes = {
-                { filter = { event = "msg_show", find = "written" },   opts = { skip = true } },
-                { filter = { event = "msg_show", find = "yanked" },    opts = { skip = true } },
-                { filter = { event = "msg_show", find = "%d+ lines" }, opts = { skip = true } },
             },
         },
         keys = {
@@ -268,93 +240,12 @@ return {
         },
     },
 
-    -- =========================================================================
-    -- GUIAS DE INDENTAÇÃO
-    -- =========================================================================
-    {
-        "lukas-reineke/indent-blankline.nvim",
-        event = "BufReadPost",
-        main  = "ibl",
-        opts  = {
-            indent  = { char = "│" },
-            scope   = { enabled = true },
-            exclude = {
-                filetypes = { "help", "alpha", "NvimTree", "lazy", "mason" },
-            },
-        },
-    },
-
-    -- =========================================================================
-    -- COLORIZER - mostra cores CSS inline (#ff5500, rgb(...))
-    -- =========================================================================
-    {
-        "NvChad/nvim-colorizer.lua",
-        event = "BufReadPost",
-        opts  = {
-            filetypes            = { "*" },
-            user_default_options = {
-                RGB    = true,
-                RRGGBB = true,
-                css    = true,
-                mode   = "background",
-            },
-        },
-    },
-
-    -- =========================================================================
-    -- TODO-COMMENTS - destaca TODO, FIXME, NOTE, HACK, WARN
-    -- =========================================================================
-    {
-        "folke/todo-comments.nvim",
-        dependencies = { "nvim-lua/plenary.nvim" },
-        event        = "BufReadPost",
-        keys = {
-            { "<leader>ft", "<cmd>TodoTelescope<cr>", desc = "Busca TODOs" },
-            { "]t", function() require("todo-comments").jump_next() end, desc = "Próximo TODO" },
-            { "[t", function() require("todo-comments").jump_prev() end, desc = "TODO anterior" },
-        },
-        opts = {},
-    },
-
-    -- =========================================================================
-    -- DRESSING - inputs e selects mais bonitos
-    -- =========================================================================
+    -- Utilitários de UI
+    { "lukas-reineke/indent-blankline.nvim", event = "BufReadPost", main = "ibl", opts = {} },
+    { "NvChad/nvim-colorizer.lua", event = "BufReadPost", opts = { user_default_options = { tailwind = true } } },
+    { "folke/todo-comments.nvim", dependencies = { "nvim-lua/plenary.nvim" }, event = "BufReadPost", opts = {} },
     { "stevearc/dressing.nvim", event = "VeryLazy", opts = {} },
-
-    -- =========================================================================
-    -- ILLUMINATE - destaca outras ocorrências da palavra sob o cursor
-    -- =========================================================================
-    {
-        "RRethy/vim-illuminate",
-        event = "BufReadPost",
-        opts  = { delay = 200 },
-        config = function(_, opts)
-            require("illuminate").configure(opts)
-        end,
-    },
-
-    -- =========================================================================
-    -- PERSISTENCE - salva e restaura sessões
-    -- <Space>ss = restaura sessão do projeto atual
-    -- =========================================================================
-    {
-        "folke/persistence.nvim",
-        event = "BufReadPre",
-        opts  = {},
-        keys = {
-            { "<leader>ss", function() require("persistence").load() end,                desc = "Restaura sessão" },
-            { "<leader>sl", function() require("persistence").load({ last = true }) end, desc = "Última sessão" },
-            { "<leader>sd", function() require("persistence").stop() end,                desc = "Não salva sessão" },
-        },
-    },
-
-    -- =========================================================================
-    -- NEOSCROLL - scroll suave
-    -- =========================================================================
-    {
-        "karb94/neoscroll.nvim",
-        event = "BufReadPost",
-        opts  = { easing_function = "quadratic" },
-    },
-
+    { "RRethy/vim-illuminate", event = "BufReadPost", opts = { delay = 200 } },
+    { "folke/persistence.nvim", event = "BufReadPre", opts = {} },
+    { "karb94/neoscroll.nvim", event = "BufReadPost", opts = { easing_function = "quadratic" } },
 }
