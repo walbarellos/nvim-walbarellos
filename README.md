@@ -171,7 +171,9 @@ Digite o gatilho e pressione `Tab`.
 | Digita + Tab | Gera |
 | --- | --- |
 | `main` | estrutura base |
-| `vars` | cola em comentário com formas de declarar variáveis |
+| `vars` | 3 `int` simples |
+| `vars2` / `vars3` / `vars4` / `vars5` | 2 a 5 `int` simples |
+| `varshelp` | cola em comentário com formas de declarar variáveis |
 | `vi` / `vii` | `int` simples / dois `int` |
 | `vf` / `vd` | `float` / `double` |
 | `vc` / `vs` | `char` / string `char nome[50]` |
