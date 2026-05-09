@@ -162,6 +162,36 @@ No Neovim:
 - `codelldb` dá suporte a debug via DAP;
 - `gdb` fica disponível no sistema para uso direto no terminal;
 - `valgrind` ajuda a achar vazamentos de memória.
+- LuaSnip fornece snippets prontos para algoritmos de faculdade.
+
+Snippets de C:
+
+Digite o gatilho e pressione `Tab`.
+
+| Digita + Tab | Gera |
+| --- | --- |
+| `main` | estrutura base |
+| `vars` | cola em comentário com formas de declarar variáveis |
+| `vi` / `vii` | `int` simples / dois `int` |
+| `vf` / `vd` | `float` / `double` |
+| `vc` / `vs` | `char` / string `char nome[50]` |
+| `lein` / `lef` | lê int/float com validação |
+| `fun` / `funv` | função com/sem retorno |
+| `funmedia` / `funmaior` | funções prontas |
+| `seif` | if / else if / else |
+| `paraf` | for com variável sincronizada |
+| `dowhile` | do/while |
+| `switch` | switch/case com default |
+| `menu` | menu interativo completo |
+| `media` | média com aprovado/reprovado |
+| `areac` / `arear` / `areat` / `areatrap` | áreas de figuras |
+| `imc` | IMC com classificação |
+| `celsius` | conversão de temperatura |
+| `maiorm` | maior entre 3 |
+| `vetor` | array completo |
+| `struct` / `strucle` | struct + leitura |
+| `farq` / `farql` | escrita/leitura de arquivo |
+| `pf` / `pfd` / `pff` / `pfs` | printf rápido |
 
 Comandos básicos:
 
@@ -316,6 +346,35 @@ Para outra porta:
 serve 3000
 ```
 
+### Extras: Kotlin, FastAPI, Docker e Banco
+
+Os arquivos de `vim/files.1.3/` adicionam suporte para uma stack mais ampla:
+
+- Kotlin/Android;
+- FastAPI/Python backend;
+- Docker Compose;
+- PostgreSQL/SQL via `vim-dadbod`;
+- TOML, Dockerfile e SQL com LSP/formatadores.
+
+Atalhos novos:
+
+| Atalho | Ação |
+| --- | --- |
+| `<Space>kk` | Kotlin: compila e roda arquivo `.kt` atual |
+| `<Space>kg` | Kotlin/Gradle: `gradle run` ou `./gradlew run` |
+| `<Space>kt` | Kotlin/Gradle: `gradle test` ou `./gradlew test` |
+| `<Space>fa` | FastAPI: roda `uvicorn main:app --reload` |
+| `<Space>fp` | FastAPI: roda `python -m pytest -v` |
+| `<Space>Du` | Docker: `docker compose up` |
+| `<Space>Dd` | Docker: `docker compose down` |
+| `<Space>Dl` | Docker: `docker compose logs -f` |
+| `<Space>Dp` | PostgreSQL: abre `psql` |
+| `<Space>Db` | Database: abre DBUI |
+| `<Space>Da` | Database: adiciona conexão |
+
+Usei `<Space>D...` para Docker/Database para não conflitar com os atalhos do
+debugger, que usam `<Space>d...`.
+
 ## Estrutura
 
 ```text
@@ -339,9 +398,11 @@ serve 3000
             ├── treesitter.lua
             ├── lsp.lua
             ├── completion.lua
+            ├── database.lua
             ├── editor.lua
             ├── formatting.lua
             ├── git.lua
+            ├── kotlin.lua
             ├── terminal.lua
             └── debug.lua
 ```

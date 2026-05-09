@@ -20,6 +20,49 @@ return {
         dependencies = { "rafamadriz/friendly-snippets" },
         config = function()
             require("luasnip.loaders.from_vscode").lazy_load()
+
+            local ls  = require("luasnip")
+            local s   = ls.snippet
+            local i   = ls.insert_node
+            local fmt = require("luasnip.extras.fmt").fmt
+
+            ls.add_snippets("kotlin", {
+                s("dc", fmt([[
+data class {}(
+    val {}: {}
+)
+]], { i(1, "NomeClasse"), i(2, "campo"), i(3, "String") })),
+
+                s("sc", fmt([[
+sealed class {} {{
+    data class {}({}) : {}()
+    object {} : {}()
+}}
+]], { i(1, "Result"), i(2, "Success"), i(3, "val data: String"), i(4, "Result"), i(5, "Error"), i(6, "Result") })),
+
+                s("sf", fmt([[
+suspend fun {}({}): {} {{
+    {}
+}}
+]], { i(1, "nome"), i(2, ""), i(3, "Unit"), i(4, "// implementação") })),
+
+                s("vm", fmt([[
+class {}ViewModel : ViewModel() {{
+    private val _{} = MutableStateFlow({})
+    val {} = _{}.asStateFlow()
+}}
+]], { i(1, "Nome"), i(2, "state"), i(3, "null"), i(4, "state"), i(5, "state") })),
+
+                s("repo", fmt([[
+class {}Repository(
+    private val {}: {}
+) {{
+    suspend fun {}(): {} {{
+        {}
+    }}
+}}
+]], { i(1, "Nome"), i(2, "dataSource"), i(3, "DataSource"), i(4, "buscar"), i(5, "Result<Unit>"), i(6, "// impl") })),
+            })
         end,
     },
 
@@ -65,10 +108,10 @@ return {
                     ["<C-e>"]     = cmp.mapping.abort(),
                     ["<CR>"]      = cmp.mapping.confirm({ select = true }),
                     ["<Tab>"] = cmp.mapping(function(fallback)
-                        if cmp.visible() then
-                            cmp.select_next_item()
-                        elseif luasnip.expand_or_jumpable() then
+                        if luasnip.expand_or_jumpable() then
                             luasnip.expand_or_jump()
+                        elseif cmp.visible() then
+                            cmp.select_next_item()
                         else
                             fallback()
                         end

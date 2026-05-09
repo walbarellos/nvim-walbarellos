@@ -47,3 +47,12 @@ require("lazy").setup("plugins", {
         },
     },
 })
+
+-- Keymaps extras: Kotlin, FastAPI, Docker e PostgreSQL
+require("core.keymaps_extra")
+
+-- Snippets locais em lua/snippets/*.lua
+local ok_luasnip_loader, luasnip_loader = pcall(require, "luasnip.loaders.from_lua")
+if ok_luasnip_loader then
+    luasnip_loader.load({ paths = vim.fn.stdpath("config") .. "/lua/snippets" })
+end

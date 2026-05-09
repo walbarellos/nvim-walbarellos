@@ -52,7 +52,11 @@ return {
                 "yamlls",        -- YAML
                 "bashls",        -- Bash/Shell
                 "marksman",      -- Markdown
-                -- "kotlin_language_server",  -- Kotlin (pesado, descomente se usar)
+                "kotlin_language_server", -- Kotlin/Android
+                "dockerls",      -- Dockerfile
+                "docker_compose_language_service", -- docker-compose.yml
+                "sqls",          -- SQL/PostgreSQL
+                "taplo",         -- TOML
             },
             automatic_enable = true,   -- nova API: habilita servidores automaticamente
         },
@@ -258,6 +262,50 @@ return {
 
             -- Markdown
             vim.lsp.config("marksman", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+            })
+
+            -- Kotlin/Android
+            vim.lsp.config("kotlin_language_server", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+                settings = {
+                    kotlin = {
+                        compiler = {
+                            jvm = { target = "17" },
+                        },
+                        externalSources = {
+                            useKlsScheme = true,
+                            autoConvertToKotlin = true,
+                        },
+                    },
+                },
+            })
+
+            -- Dockerfile
+            vim.lsp.config("dockerls", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+            })
+
+            -- Docker Compose
+            vim.lsp.config("docker_compose_language_service", {
+                capabilities = capabilities,
+                on_attach    = on_attach,
+            })
+
+            -- SQL/PostgreSQL
+            vim.lsp.config("sqls", {
+                capabilities = capabilities,
+                on_attach = function(client, bufnr)
+                    client.server_capabilities.documentFormattingProvider = false
+                    on_attach(client, bufnr)
+                end,
+            })
+
+            -- TOML
+            vim.lsp.config("taplo", {
                 capabilities = capabilities,
                 on_attach    = on_attach,
             })

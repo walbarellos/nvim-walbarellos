@@ -46,6 +46,9 @@ return {
                 cpp        = { "clang_format" },
                 bash       = { "shfmt" },
                 sh         = { "shfmt" },
+                kotlin     = { "ktlint" },
+                sql        = { "sql_formatter" },
+                toml       = { "taplo" },
             },
 
             -- Formata ao salvar
@@ -85,6 +88,7 @@ return {
                 -- cppcheck não está no Mason; use :Mason pra instalar cpplint se quiser
                 bash       = { "shellcheck" },
                 sh         = { "shellcheck" },
+                dockerfile = { "hadolint" },
             }
 
             -- Roda o linter ao salvar e ao entrar no buffer
@@ -120,10 +124,14 @@ return {
                 "prettier",    -- JS/TS/HTML/CSS/JSON/YAML/MD
                 "clang-format",-- C/C++
                 "shfmt",       -- Shell
+                "ktlint",      -- Kotlin
+                "sql-formatter", -- SQL
+                "taplo",       -- TOML
                 -- Linters
                 -- "cpplint",   -- C/C++ (opcional, instale via :Mason se quiser)
                 "shellcheck",  -- Shell
                 "eslint_d",    -- JS/TS (versão daemon, muito rápida)
+                "hadolint",    -- Dockerfile
             },
             auto_update = false,
             run_on_start = true,

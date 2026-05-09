@@ -29,9 +29,10 @@ return {
                     highlight = { enable = true },
                     indent = { enable = true },
                     ensure_installed = {
-                        "bash", "c", "cpp", "html", "javascript", "json", "lua", "markdown",
-                        "markdown_inline", "python", "query", "regex", "typescript", "vim",
-                        "vimdoc", "yaml",
+                        "bash", "c", "cpp", "dockerfile", "groovy", "html", "javascript",
+                        "json", "kotlin", "lua", "markdown", "markdown_inline", "python",
+                        "query", "regex", "sql", "toml", "typescript", "vim", "vimdoc",
+                        "xml", "yaml",
                     },
                     incremental_selection = {
                         enable = true,
