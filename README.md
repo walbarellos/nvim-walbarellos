@@ -75,6 +75,26 @@ cd nvim-walbarellos
 bash install.sh
 ```
 
+Instaladores disponíveis:
+
+| Script | Quando usar |
+| --- | --- |
+| `install.sh` | Instalação principal: Neovim, ZSH, C, Python, Web, fonte e config base |
+| `install-extras.sh` | Opcional: Kotlin, Docker, PostgreSQL/SQL e FastAPI |
+
+Para faculdade com C/Python/HTML/CSS/JS, use só:
+
+```bash
+bash install.sh
+```
+
+Se também quiser os extras:
+
+```bash
+bash install.sh
+bash install-extras.sh
+```
+
 O instalador:
 
 - detecta a distribuição Linux;
@@ -382,6 +402,7 @@ debugger, que usam `<Space>d...`.
 ```text
 .
 ├── install.sh
+├── install-extras.sh
 ├── README.md
 ├── .zshrc
 └── nvim/

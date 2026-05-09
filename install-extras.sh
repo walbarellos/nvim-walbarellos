@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# install_willian.sh
-# Roda DEPOIS do install.sh original do walbarellos.
-# Instala as dependências extras para a stack: Kotlin, Docker, PostgreSQL, FastAPI.
+# install-extras.sh
+# Opcional. Roda depois do install.sh.
+# Instala dependências extras para Kotlin, Docker, PostgreSQL e FastAPI.
 
 set -e
 
