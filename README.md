@@ -1,5 +1,12 @@
 # Nabur's Neovim Config
 
+<img width="713" height="632" alt="image" src="https://github.com/user-attachments/assets/53166511-7ef6-453c-b270-878faed6ddfc" />
+
+
+<img width="724" height="568" alt="image" src="https://github.com/user-attachments/assets/0da62b16-921d-48c9-af52-9e16beac53cd" />
+
+<img width="721" height="637" alt="image" src="https://github.com/user-attachments/assets/b02243af-4a39-41c3-be53-9b45e3f5906e" />
+
 Configuração pessoal de Neovim focada em programação com C, C++, Python, Lua,
 JavaScript/TypeScript, Bash, Markdown, JSON/YAML e Portugol.
 
