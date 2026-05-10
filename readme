@@ -1,4 +1,5 @@
 basta executar:
 cd mypersonal-zsh-config
-chmod +x install.sh
+chmod +x install.sh install-elite.sh
 ./install.sh
+./install-elite.sh (opcional: Yazi + GDB Dashboard)
