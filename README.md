@@ -5,7 +5,8 @@ JavaScript/TypeScript, Bash, Markdown, JSON/YAML e Portugol.
 
 Ela usa `lazy.nvim` como gerenciador de plugins, `mason.nvim` para instalar
 ferramentas de linguagem, LSP para inteligência de código, autocomplete,
-formatação automática, integração com Git, terminal embutido e debugger.
+formatação automática, integração com Git, terminal embutido, debugger e uma
+bancada de estudo com `tmux`.
 
 ## O Que Esta Config Já Entrega
 
@@ -81,6 +82,7 @@ Instaladores disponíveis:
 | --- | --- |
 | `install.sh` | Instalação principal: Neovim, ZSH, C, Python, Web, fonte e config base |
 | `install-extras.sh` | Opcional: Kotlin, Docker, PostgreSQL/SQL e FastAPI |
+| `tmux-setup.sh` | Repara/instala só a bancada tmux na máquina atual |
 
 Para faculdade com C/Python/HTML/CSS/JS, use só:
 
@@ -95,16 +97,31 @@ bash install.sh
 bash install-extras.sh
 ```
 
+Se estiver numa máquina da faculdade, ou se `Ctrl+a` ainda estiver indo para o
+começo da linha, rode só o reparo inteligente do tmux:
+
+```bash
+bash tmux-setup.sh
+```
+
+Esse script detecta Arch/Ubuntu, instala dependências quando possível, copia
+`tmux/tmux.conf` para `~/.tmux.conf`, corrige `batcat` para `bat`, instala TPM e
+Catppuccin, e recarrega a sessão se você já estiver dentro do tmux.
+
 O instalador:
 
 - detecta a distribuição Linux;
 - instala dependências básicas;
 - instala `zsh` quando ele ainda não existe;
+- instala `tmux` para sessões persistentes de estudo;
 - faz backup do `~/.zshrc` antigo, se existir;
 - instala o `.zshrc` do repositório;
 - instala plugins de ZSH;
 - faz backup do `~/.config/nvim` antigo, se existir;
 - copia a pasta `nvim/` do repo para `~/.config/nvim`.
+- copia `tmux/tmux.conf` para `~/.tmux.conf`;
+- instala o TPM em `~/.tmux/plugins/tpm`, se ainda não existir.
+- instala o Catppuccin tmux em `~/.tmux/plugins/catppuccin/tmux`.
 
 Depois da instalação:
 
@@ -114,6 +131,18 @@ nvim
 
 Na primeira abertura, o `lazy.nvim`, o `mason.nvim` e os plugins podem baixar
 dependências automaticamente.
+
+Para abrir uma bancada de C com sessão persistente:
+
+```bash
+tmux new -s c
+```
+
+Na primeira vez dentro do tmux, instale os plugins com:
+
+```text
+Ctrl+a depois I
+```
 
 Por padrão, o instalador não troca seu shell de login. Para instalar e também
 tornar o ZSH o shell padrão:
@@ -132,6 +161,7 @@ bash install.sh --fonts-only
 
 - Neovim 0.9 ou superior.
 - Git.
+- Tmux.
 - Curl.
 - Node.js e npm.
 - Python 3 e pip.
@@ -139,6 +169,11 @@ bash install.sh --fonts-only
 - `ripgrep`, usado por buscas rápidas.
 - `fd`, usado por algumas buscas/listagens.
 - `fzf`, útil no terminal.
+- `bat`, usado pelo seletor de sessões do tmux.
+- `acpi`, `sysstat` e `lm_sensors`/`lm-sensors`, usados por módulos de status
+  do tmux.
+- `python-yaml` no Arch ou `python3-yaml` no Ubuntu, usado pelo menu
+  customizável do `tmux-which-key`.
 - `lazygit`, para a interface Git dentro do Neovim.
 - Uma Nerd Font no terminal, para ícones renderizarem corretamente.
 
@@ -257,6 +292,85 @@ Exemplo: se o arquivo aberto for `aula1.c`, `<Space>rr` roda algo equivalente a:
 
 ```bash
 gcc aula1.c -Wall -Wextra -std=c11 -g -o aula1 && ./aula1
+```
+
+### Bancada tmux 12/10 para C
+
+A configuração inclui `tmux/tmux.conf` para estudar C em sessões persistentes
+com Catppuccin Mocha, status bar com módulos, seletor fuzzy de sessões e
+restauração automática. O instalador copia essa configuração para
+`~/.tmux.conf`, usando a rota clássica do tmux para reduzir atrito entre Arch,
+Ubuntu, TPM e plugins:
+
+```text
+janela 1: pensamento / enunciado / anotações
+janela 2: NeoVim com o .c
+janela 3: terminal para gcc, execução e testes
+```
+
+Quando fizer sentido usar painéis na mesma janela:
+
+```text
+┌──────────────────────────────┬──────────────────────────────┐
+│  raciocinio.md               │  exercicio.c no NeoVim       │
+├──────────────────────────────┴──────────────────────────────┤
+│  gcc / ./programa / testes / erros                           │
+└───────────────────────────────────────────────────────────────┘
+```
+
+Plugins do tmux habilitados:
+
+| Plugin | Função |
+| --- | --- |
+| `tmux-plugins/tpm` | Gerenciador de plugins |
+| `tmux-plugins/tmux-sensible` | Padrões básicos bons |
+| `christoomey/vim-tmux-navigator` | Navegação contínua entre tmux e NeoVim |
+| `tmux-plugins/tmux-resurrect` | Salva e restaura sessões |
+| `tmux-plugins/tmux-continuum` | Salva automaticamente a cada 15 minutos e restaura no início |
+| `tmux-plugins/tmux-yank` | Copia para o clipboard do sistema |
+| `omerxx/tmux-sessionx` | Seletor fuzzy de sessões, janelas e diretórios |
+| `alexwforsythe/tmux-which-key` | Menu visual do tmux em `Ctrl+a`, depois `Espaço` |
+| `tmux-plugins/tmux-cpu` | CPU/RAM na barra |
+| `tmux-plugins/tmux-battery` | Bateria na barra |
+| `tmux-plugins/tmux-prefix-highlight` | Indica visualmente quando o prefixo foi pressionado |
+
+O tema `catppuccin/tmux` é instalado manualmente em
+`~/.tmux/plugins/catppuccin/tmux`, usando a tag `v2.3.0`, porque o próprio
+projeto recomenda esse caminho para evitar conflitos de nome via TPM.
+
+O `tmux-which-key` é configurado como prefix-only: `Ctrl+a`, depois `Espaço`
+abre o menu visual do tmux, mas `Ctrl+Space` continua livre para NeoVim,
+autocomplete e qualquer outro uso dentro do editor.
+
+Ficou de fora de propósito:
+
+- `tmux-fzf`, porque o `sessionx` já cobre seleção fuzzy, preview, criação,
+  rename e delete de sessões.
+
+Atalhos principais:
+
+| Ação | Tecla |
+| --- | --- |
+| Prefixo | `Ctrl+a` |
+| Criar janela | `Ctrl+a`, depois `c` |
+| Listar janelas | `Ctrl+a`, depois `w` |
+| Dividir painel verticalmente | `Ctrl+a`, depois `|` |
+| Dividir painel horizontalmente | `Ctrl+a`, depois `-` |
+| Navegar entre NeoVim/tmux | `Ctrl+h/j/k/l` |
+| Navegar entre painéis com prefixo | `Ctrl+a`, depois `h/j/k/l` |
+| Redimensionar painéis | `Ctrl+a`, depois `H/J/K/L` |
+| Desanexar sessão | `Ctrl+a`, depois `d` |
+| Recarregar config | `Ctrl+a`, depois `r` |
+| Instalar plugins | `Ctrl+a`, depois `I` |
+| Abrir menu visual | `Ctrl+a`, depois `Espaço` |
+| Abrir seletor de sessões | `Ctrl+a`, depois `o` |
+| Salvar sessão com resurrect | `Ctrl+a`, depois `Ctrl+s` |
+| Restaurar sessão com resurrect | `Ctrl+a`, depois `Ctrl+r` |
+
+Na primeira execução, abra o tmux e instale os plugins do TPM:
+
+```text
+Ctrl+a depois I
 ```
 
 Para projetos com múltiplos arquivos:
@@ -405,6 +519,8 @@ debugger, que usam `<Space>d...`.
 ├── install-extras.sh
 ├── README.md
 ├── .zshrc
+├── tmux/
+│   └── tmux.conf
 └── nvim/
     ├── init.lua
     ├── after/
@@ -427,6 +543,7 @@ debugger, que usam `<Space>d...`.
             ├── git.lua
             ├── kotlin.lua
             ├── terminal.lua
+            ├── tmux.lua
             └── debug.lua
 ```
 
@@ -495,7 +612,7 @@ Atalhos importantes:
 | `<C-d>` | Desce meia tela e centraliza |
 | `<C-u>` | Sobe meia tela e centraliza |
 | `n` / `N` | Próximo/anterior resultado de busca e centraliza |
-| `<C-h/j/k/l>` | Navega entre splits |
+| `<C-h/j/k/l>` | Navega entre splits e painéis do tmux |
 | `<C-Up/Down/Left/Right>` | Redimensiona splits |
 | `<S-l>` / `<S-h>` | Próximo/anterior buffer |
 | `<Space>bd` | Fecha buffer |
@@ -873,14 +990,20 @@ Atalhos:
 | `<Space>rv` | C: compila e roda valgrind |
 | `<Esc><Esc>` | Sai do modo terminal |
 
-Dentro do terminal, também é possível navegar para splits com:
+Dentro do terminal, também é possível navegar para splits do NeoVim e painéis
+do tmux com:
 
 | Tecla | Ação |
 | --- | --- |
-| `<C-h>` | Vai para split à esquerda |
-| `<C-j>` | Vai para split abaixo |
-| `<C-k>` | Vai para split acima |
-| `<C-l>` | Vai para split à direita |
+| `<C-h>` | Vai para tmux/split à esquerda |
+| `<C-j>` | Vai para tmux/split abaixo |
+| `<C-k>` | Vai para tmux/split acima |
+| `<C-l>` | Vai para tmux/split à direita |
+
+### `plugins/tmux.lua`
+
+Integra o plugin `christoomey/vim-tmux-navigator` no lado do NeoVim. Isso faz
+`<C-h/j/k/l>` atravessar splits do editor e painéis do tmux com a mesma lógica.
 
 ### `plugins/debug.lua`
 

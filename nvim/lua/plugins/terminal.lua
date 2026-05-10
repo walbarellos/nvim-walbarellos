@@ -203,14 +203,14 @@ return {
                 callback = function()
                     map("t", "<Esc><Esc>", "<C-\\><C-n>",
                         { buffer = 0, desc = "Sai do modo terminal" })
-                    map("t", "<C-h>", "<C-\\><C-n><C-w>h",
-                        { buffer = 0, desc = "Terminal → split esquerda" })
-                    map("t", "<C-l>", "<C-\\><C-n><C-w>l",
-                        { buffer = 0, desc = "Terminal → split direita" })
-                    map("t", "<C-j>", "<C-\\><C-n><C-w>j",
-                        { buffer = 0, desc = "Terminal → split baixo" })
-                    map("t", "<C-k>", "<C-\\><C-n><C-w>k",
-                        { buffer = 0, desc = "Terminal → split cima" })
+                    map("t", "<C-h>", "<C-\\><C-n><cmd>TmuxNavigateLeft<cr>",
+                        { buffer = 0, desc = "Terminal -> tmux/split esquerda" })
+                    map("t", "<C-l>", "<C-\\><C-n><cmd>TmuxNavigateRight<cr>",
+                        { buffer = 0, desc = "Terminal -> tmux/split direita" })
+                    map("t", "<C-j>", "<C-\\><C-n><cmd>TmuxNavigateDown<cr>",
+                        { buffer = 0, desc = "Terminal -> tmux/split baixo" })
+                    map("t", "<C-k>", "<C-\\><C-n><cmd>TmuxNavigateUp<cr>",
+                        { buffer = 0, desc = "Terminal -> tmux/split cima" })
                 end,
             })
         end,
